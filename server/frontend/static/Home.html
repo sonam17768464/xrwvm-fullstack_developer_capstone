@@ -27,6 +27,15 @@ const logout = async (e) => {
   }
 };
 
+const get_cars = async (e) => {
+//Include the code for logout here.
+  let url = window.location.origin+"/djangoapp/get_cars";
+  const res = await fetch(url, {
+    method: "GET",
+  });
+
+};
+
 let checkSession = ()=>{
   let curr_user = sessionStorage.getItem("username");
 
@@ -74,6 +83,7 @@ let checkSession = ()=>{
   <div class="banner">
     <h5>Welcome to our Dealerships!</h5>
     <a href="/dealers" class="btn" style="background-color: aqua;margin:10px">View Dealerships</a>
+    <a href="/get_cars" class="btn" style="background-color: aqua;margin:10px" onclick="get_cars()">Get Cars</a>
   </div>
 </div>
 </div>
