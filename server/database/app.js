@@ -8,27 +8,36 @@ const port = 3030;
 app.use(cors())
 app.use(require('body-parser').urlencoded({ extended: false }));
 
-const reviews_data = JSON.parse(fs.readFileSync("reviews.json", 'utf8'));
-const dealerships_data = JSON.parse(fs.readFileSync("dealerships.json", 'utf8'));
-
-mongoose.connect("mongodb://mongo_db:27017/",{'dbName':'dealershipsDB'});
+const reviews_data = JSON.parse(fs.readFileSync("./data/reviews.json", 'utf8'));
+const dealerships_data = JSON.parse(fs.readFileSync("./data/dealerships.json", 'utf8'));
 
 
 const Reviews = require('./review');
 
 const Dealerships = require('./dealership');
-
-try {
-  Reviews.deleteMany({}).then(()=>{
-    Reviews.insertMany(reviews_data['reviews']);
-  });
-  Dealerships.deleteMany({}).then(()=>{
-    Dealerships.insertMany(dealerships_data['dealerships']);
-  });
-  
-} catch (error) {
-  res.status(500).json({ error: 'Error fetching documents' });
-}
+// "mongodb://mongo_db:27017/"
+mongoose.connect("mongodb+srv://sonam17768464:sonam123@cluster0.nsexzeh.mongodb.net/?retryWrites=true&w=majority",{'dbName':'dealershipsDB'})
+  .then(result => {
+    console.log('connected to MongoDB')
+    try {
+      Reviews.deleteMany({}, { timeout: 100000 }).then(()=>{
+        Reviews.insertMany(reviews_data['reviews']).then(()=>{
+        console.log('Reviews')
+      })
+      });
+      Dealerships.deleteMany({}).then(()=>{
+        Dealerships.insertMany(dealerships_data['dealerships']).then(()=>{
+        console.log('Dealerships')
+        })
+      });
+      
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching documents' });
+    }
+  })
+  .catch(error => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
 
 
 // Express route to home
@@ -50,9 +59,10 @@ app.get('/fetchReviews', async (req, res) => {
 app.get('/fetchReviews/dealer/:id', async (req, res) => {
   try {
     const documents = await Reviews.find({dealership: req.params.id});
-    res.json(documents);
+    console.log(documents)
+    return res.json(documents);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching documents' });
+    return res.status(500).json({ error: 'Error fetching documents' });
   }
 });
 
@@ -61,9 +71,9 @@ app.get('/fetchDealers', async (req, res) => {
 //Write your code here
 try {
   const documents = await Dealerships.find();
-  res.json(documents);
+  return res.json(documents);
 } catch (error) {
-  res.status(500).json({ error: 'Error fetching documents' });
+  return res.status(500).json({ error: 'Error fetching documents' });
 }
 });
 
@@ -109,6 +119,7 @@ app.post('/insert_review', express.raw({ type: '*/*' }), async (req, res) => {
 
   try {
     const savedReview = await review.save();
+    console.log(savedReview)
     res.json(savedReview);
   } catch (error) {
 		console.log(error);

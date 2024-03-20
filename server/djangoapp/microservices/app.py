@@ -27,6 +27,7 @@ def analyze_sentiment(input_txt):
     elif (neu > neg and neu > pos):
         res = "neutral"
     res = json.dumps({"sentiment": res})
+    # res = {"sentiment": res}
     print(res)
     return res
 

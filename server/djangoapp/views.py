@@ -108,7 +108,7 @@ def get_dealerships(request, state="All"):
         endpoint = "/fetchDealers"
     else:
         endpoint = "/fetchDealers/"+state
-    dealerships = get_request(endpoint)
+    dealerships = restapis.get_request(endpoint)
     return JsonResponse({"status":200,"dealers":dealerships})
 
 
@@ -120,10 +120,13 @@ def get_dealer_reviews(request, dealer_id):
     if(dealer_id):
         endpoint = "/fetchReviews/dealer/"+str(dealer_id)
         reviews = restapis.get_request(endpoint)
+        print(reviews)
+
         for review_detail in reviews:
-            response = restapis.analyze_review_sentiments(review_detail['review'])
+            response = restapis.analyze_review_sentiments(review_detail["review"])
             print(response)
             review_detail['sentiment'] = response['sentiment']
+            
         return JsonResponse({"status":200,"reviews":reviews})
     else:
         return JsonResponse({"status":400,"message":"Bad Request"})
@@ -148,7 +151,7 @@ def add_review(request):
         data = json.loads(request.body)
         try:
             response = restapis.post_review(data)
-            return JsonResponse({"status":200})
+            return JsonResponse({"status":200, "response": response})
         except:
             return JsonResponse({"status":401,"message":"Error in posting review"})
     else:
